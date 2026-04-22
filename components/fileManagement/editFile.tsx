@@ -10,7 +10,7 @@ type Props = {
 };
 
 export default function EditFileForm({ file, onClose, onSuccess }: Props) {
-    const [datasetName, setDatasetName] = useState(file.dataSetId?.originalName || "");
+    const [datasetName, setDatasetName] = useState(file.originalName || file.dataSetId?.originalName || "");
     const API = process.env.NEXT_PUBLIC_API_URL;
 
     const handleEdit = async (e: React.FormEvent) => {
@@ -24,7 +24,8 @@ export default function EditFileForm({ file, onClose, onSuccess }: Props) {
         }
 
         try {
-            const res = await fetch(`${API}/api/datasets/${file.dataSetId._id}`, {
+            const idDataset = file.dataSetId?._id || file._id;
+            const res = await fetch(`${API}/api/datasets/${idDataset}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

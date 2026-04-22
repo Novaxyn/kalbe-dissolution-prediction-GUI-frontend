@@ -4,11 +4,20 @@ import { useState, useEffect } from "react";
 import styles from "./fileTable.module.css";
 import Modal from "@/components/Modal";
 import EditFileForm from "@/components/fileManagement/editFile";
+import UploadDatasetModal from "./UploadDatasetModal";
+import styles2 from "./buttonUpload.module.css";
 
 type User = {
     _id: string;
     username: string;
 };
+
+type Dataset = {
+    _id: string;
+    originalName: string;
+    uploadTime: string;
+    uploadedBy: User;
+}
 
 type Report = {
     _id: string;
@@ -22,6 +31,8 @@ type Report = {
         username: string;
     };
 
+    uploadedOn: string;
+
     reportCreatedBy?: {
         username: string;
     };
@@ -32,19 +43,31 @@ type Report = {
 };
 
 export default function DatasetReportTable() {
-    const [data, setData] = useState<Report[]>([]);
+    const [file, setFile] = useState<File | null>(null);
+    const [datasets, setDatasets] = useState<Dataset[]>([]);
+    const [reports, setReports] = useState<Report[]>([]);
 
-    const [showEdit, setShowEdit] = useState(false);
-    const [showArchive, setShowArchive] = useState(false);
+    const [showEditDataset, setShowEditDataset] = useState(false);
+    const [showEditReport, setShowEditReport] = useState(false);
+
+    const [showArchiveDataset, setShowArchiveDataset] = useState(false);
+    const [showArchiveReport, setShowArchiveReport] = useState(false);
+
     const [selDatasetReport, setSelDatasetReport] = useState<string | null>(null);
-    const [editFile, setEditFile] = useState<Report | null>(null);
+    const [selDataset, setSelDataset] = useState<string | null>(null);
+
+    const [editDataset, setEditDataset] = useState<Dataset | null>(null);
+    const [editReport, setEditReport] = useState<Report | null>(null);
+
+    const [showUploadModal, setShowUploadModal] = useState(false);
     const API = process.env.NEXT_PUBLIC_API_URL;
 
     useEffect(() => {
-        fetchData();
+        fetchDatasetReport();
+        fetchDataset();
     }, []);
 
-    const fetchData = async () => {
+    const fetchDatasetReport = async () => {
         try {
             const token = localStorage.getItem("token");
 
@@ -55,7 +78,24 @@ export default function DatasetReportTable() {
             });
 
             const result = await res.json();
-            setData(result.data || []);
+            setReports(result.data || []);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const fetchDataset = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(`${API}/api/datasets`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const result = await res.json();
+            setDatasets(result.datasets || []);
         } catch (error) {
             console.log(error);
         }
@@ -89,7 +129,71 @@ export default function DatasetReportTable() {
         }
     };
 
-    const handleArchive = async () => {
+    const handleArchiveDataset = async () => {
+        if (!selDataset) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(`${API}/api/datasets/archive/${selDataset}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message);
+                return;
+            }
+
+            setShowArchiveDataset(false);
+            fetchDataset();
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const uploadDataset = async () => {
+        if (!file) {
+                alert("Please select a file");
+                return;
+        }
+            
+        try {
+            const token = localStorage.getItem("token");
+
+            const formData = new FormData();
+            formData.append("dataset", file);
+
+            const res = await fetch(`${API}/api/datasets/upload`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message);
+                return;
+            }
+
+            alert("Upload Success");
+
+            setFile(null);
+            fetchDataset(); // Refresh the table
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleArchiveReport = async () => {
         if (!selDatasetReport) return;
 
         try {
@@ -110,8 +214,8 @@ export default function DatasetReportTable() {
                 return;
             }
 
-            setShowArchive(false);
-            fetchData();
+            setShowArchiveReport(false);
+            fetchDatasetReport();
         } catch (error) {
             console.log(error);
         }
@@ -121,26 +225,104 @@ export default function DatasetReportTable() {
         <div className={styles.container}>
             <h2 className={styles.title}>Dataset Report</h2>
 
+        {/* Dataset */}
+            <table className={styles.table}>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>MicroNIR Dataset</th>
+                        <th>Uploaded By</th>
+                        <th>Date</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {datasets.length === 0 ? (
+                        <tr>
+                            <td colSpan={6}>No data</td>
+                        </tr>
+                    ) : (
+                        datasets.map((item, index) => (
+                            <tr key={item._id}>
+                                <td>{index + 1}</td>
+
+                                <td>{item.originalName || "-"}</td>
+
+                                <td>
+                                    {item.uploadedBy?.username || "-"}
+                                </td>
+
+                                <td>
+                                    {new Date(item.uploadTime).toLocaleDateString(
+                                        "id-ID", {
+                                            day: "numeric",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        }
+                                    )}
+                                </td>
+
+                                <td>
+                                    <div className={styles.actionGroup}>
+                                        <button onClick={() => {
+                                            setShowEditDataset(true);
+                                            setEditDataset(item);
+                                        }}
+                                        className={styles.buttonAction}>
+                                            Edit
+                                        </button>
+                                        <button className={styles.buttonAction}
+                                            onClick={() => {
+                                                setShowArchiveDataset(true)
+                                                setSelDataset(item._id)
+                                            }}
+                                        >
+                                            Archive
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+
+            <div style={{marginBottom: "20px", marginTop: "20px"}}>
+                <button 
+                    onClick={() => {
+                        setShowUploadModal(true)
+                    }}
+                    className={styles2.buttonUpload}
+                >
+                    Upload Dataset
+                </button>
+            </div>
+
+            {/* Dataset Report */}
             <table className={styles.table}>
                 <thead>
                     <tr>
                         <th>No</th>
                         <th>Dataset</th>
                         <th>Uploaded By</th>
+                        <th>Uploaded On</th>
                         <th>Prediction Result</th>
                         <th>Report Created By</th>
-                        <th>Date</th>
+                        <th>Report Created On</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    {data.length === 0 ? (
+                    {reports.length === 0 ? (
                         <tr>
                             <td colSpan={6}>No data</td>
                         </tr>
                     ) : (
-                        data.map((item, index) => (
+                        reports.map((item, index) => (
                             <tr key={item._id}>
                                 <td>{index + 1}</td>
 
@@ -148,6 +330,18 @@ export default function DatasetReportTable() {
 
                                 <td>
                                     {item.uploadedBy?.username || "-"}
+                                </td>
+
+                                <td>
+                                    {new Date(item.uploadedOn).toLocaleDateString(
+                                        "id-ID", {
+                                            day: "numeric",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        }
+                                    )}
                                 </td>
 
                                 <td>
@@ -184,13 +378,18 @@ export default function DatasetReportTable() {
                                 <td>
                                     <div className={styles.actionGroup}>
                                         <button onClick={() => {
-                                            setShowEdit(true)
-                                            setEditFile(item)
+                                            setShowEditReport(true)
+                                            setEditReport(item)
                                         }}
                                         className={styles.buttonAction}>
                                             Edit
                                         </button>
-                                        <button className={styles.buttonAction}>
+                                        <button className={styles.buttonAction}
+                                            onClick={() => {
+                                                setShowArchiveReport(true)
+                                                setSelDatasetReport(item._id)
+                                            }}
+                                        >
                                             Archive
                                         </button>
                                     </div>
@@ -201,26 +400,60 @@ export default function DatasetReportTable() {
                 </tbody>
             </table>
 
+            {/* Dataset */}
             <Modal
-                isOpen={showEdit}
-                onClose={() => setShowEdit(false)}
+                isOpen={showEditDataset}
+                onClose={() => setShowEditDataset(false)}
             >
-                {editFile && (
+                {editDataset && (
                     <EditFileForm
-                        file={editFile}
-                        onClose={() => setShowEdit(false)}
+                        file={editDataset}
+                        onClose={() => setShowEditDataset(false)}
                         onSuccess={() => {
-                            setShowEdit(false);
-                            fetchData();
+                            setShowEditDataset(false);
+                            fetchDataset();
                         }}
                     />
                 )}
 
             </Modal>
 
+            {/* Upload Dataset */}
             <Modal
-                isOpen={showArchive}
-                onClose={() => setShowArchive(false)}
+                isOpen={showUploadModal}
+                onClose={() => setShowUploadModal(false)}
+            >
+                <UploadDatasetModal 
+                    onClose={() => setShowUploadModal(false)}
+                    onSuccess={() => {
+                        setShowUploadModal(false);
+                        fetchDatasetReport();
+                    }}
+                />
+            </Modal>
+
+            {/* Dataset Report */}
+            <Modal
+                isOpen={showEditReport}
+                onClose={() => setShowEditReport(false)}
+            >
+                {editReport && (
+                    <EditFileForm
+                        file={editReport}
+                        onClose={() => setShowEditReport(false)}
+                        onSuccess={() => {
+                            setShowEditReport(false);
+                            fetchDatasetReport();
+                        }}
+                    />
+                )}
+
+            </Modal>
+
+            {/* Dataset Report */}
+            <Modal
+                isOpen={showArchiveReport}
+                onClose={() => setShowArchiveReport(false)}
             >
                 {selDatasetReport && (
                     <div className={styles.overlay}>
@@ -228,20 +461,55 @@ export default function DatasetReportTable() {
                             <h2 className={styles.title}>ARCHIVED DATASET REPORT</h2>
 
                             <p className={styles.text}>
-                                Are you sure you want to deactivate this user?
+                                Are you sure you want to archive this report?
                             </p>
 
                             <div className={styles.buttonGroup}>
                                 <button
                                     className={styles.noBtn}
-                                    onClick={() => setShowArchive(false)}
+                                    onClick={() => setShowArchiveReport(false)}
                                 >
                                     No
                                 </button>
 
                                 <button
                                     className={styles.yesBtn}
-                                    onClick={() => handleArchive()}
+                                    onClick={() => handleArchiveReport()}
+                                >
+                                    Yes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+            </Modal>
+
+            {/* Dataset */}
+            <Modal
+                isOpen={showArchiveDataset}
+                onClose={() => setShowArchiveDataset(false)}
+            >
+                {selDataset && (
+                    <div className={styles.overlay}>
+                        <div className={styles.confirmBox}>
+                            <h2 className={styles.title}>ARCHIVED DATASET</h2>
+
+                            <p className={styles.text}>
+                                Are you sure you want to archive this dataset?
+                            </p>
+
+                            <div className={styles.buttonGroup}>
+                                <button
+                                    className={styles.noBtn}
+                                    onClick={() => setShowArchiveDataset(false)}
+                                >
+                                    No
+                                </button>
+
+                                <button
+                                    className={styles.yesBtn}
+                                    onClick={() => handleArchiveDataset()}
                                 >
                                     Yes
                                 </button>

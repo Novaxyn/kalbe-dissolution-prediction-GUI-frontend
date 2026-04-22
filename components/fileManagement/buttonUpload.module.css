@@ -1,0 +1,30 @@
+.buttonUpload {
+  background-color: #7ED321; /* hijau terang */
+  color: #000;
+  font-weight: 600;
+  font-size: 16px;
+
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect */
+.buttonUpload:hover {
+  background-color: #6ac11d;
+}
+
+/* Click effect */
+.buttonUpload:active {
+  transform: scale(0.97);
+}
+
+/* Optional: biar center di container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
