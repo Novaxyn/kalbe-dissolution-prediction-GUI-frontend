@@ -2,6 +2,7 @@
 
 import {useState} from "react";
 import styles from "./editUser.module.css";
+import Popup from "../PopUp";
 
 type props = {
     user: any;
@@ -14,6 +15,11 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
     const [email, setEmail] = useState(user.email || "");
     const [role, setRole] = useState(user.role);
 
+    const [popup, setPopup] = useState({
+        show: false,
+        message: ""
+    });
+
     const API = process.env.NEXT_PUBLIC_API_URL;
 
     const handleEdit = async (e: React.FormEvent) => {
@@ -22,7 +28,10 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            alert("Unauthorized");
+            setPopup({
+                show: true,
+                message: "Unauthorized"
+            });
             return;
         }
 
@@ -43,16 +52,27 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
-            alert("User Updated");
-            onSuccess();
-        } catch (error) {
-            console.log(error);
+                setPopup({
+                    show: true,
+                    message: "User Updated"
+                });
+                onSuccess();
+
+            } catch (error) {
+                console.log(error);
+                setPopup({
+                    show: true,
+                    message: "Failed to update user"
+                });
+            }
         }
-    };
 
     return (
         <div className={styles.container}>
@@ -99,6 +119,13 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
                     </button>
                 </div>
             </form>
+            <Popup
+                isOpen={popup.show}
+                message={popup.message}
+                onClose={() => setPopup({ show: false, message: "" })}
+            />
         </div>
     )
+
+
 }

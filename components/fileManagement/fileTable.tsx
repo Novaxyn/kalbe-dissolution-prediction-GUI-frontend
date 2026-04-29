@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import styles from "./fileTable.module.css";
 import Modal from "@/components/Modal";
+import Popup from "@/components/PopUp";
 import EditFileForm from "@/components/fileManagement/editFile";
 import UploadDatasetModal from "./UploadDatasetModal";
 import styles2 from "./buttonUpload.module.css";
@@ -61,6 +62,11 @@ export default function DatasetReportTable() {
 
     const [showUploadModal, setShowUploadModal] = useState(false);
     const API = process.env.NEXT_PUBLIC_API_URL;
+
+    const [popup, setPopup] = useState({
+        show: false,
+        message: ""
+    });
 
     useEffect(() => {
         fetchDatasetReport();
@@ -146,7 +152,10 @@ export default function DatasetReportTable() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
@@ -159,8 +168,11 @@ export default function DatasetReportTable() {
 
     const uploadDataset = async () => {
         if (!file) {
-                alert("Please select a file");
-                return;
+            setPopup({
+            show: true,
+            message: "Please select a file"
+            });
+            return;
         }
             
         try {
@@ -180,11 +192,17 @@ export default function DatasetReportTable() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
-                return;
+            setPopup({
+                show: true,
+                message: data.message
+            });
+            return;
             }
 
-            alert("Upload Success");
+            setPopup({
+                show: true,
+                message: "Upload Success"
+            });
 
             setFile(null);
             fetchDataset(); // Refresh the table
@@ -210,7 +228,10 @@ export default function DatasetReportTable() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
@@ -254,15 +275,17 @@ export default function DatasetReportTable() {
                                 </td>
 
                                 <td>
-                                    {new Date(item.uploadTime).toLocaleDateString(
-                                        "id-ID", {
-                                            day: "numeric",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
-                                    )}
+                                    {new Intl.DateTimeFormat("id-ID", {
+                                        timeZone: "Asia/Jakarta",
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                    }).format(new Date(item.uploadTime)) +
+                                    "." +
+                                    String(new Date(item.uploadTime).getMilliseconds()).padStart(3, "0")}
                                 </td>
 
                                 <td>
@@ -333,15 +356,17 @@ export default function DatasetReportTable() {
                                 </td>
 
                                 <td>
-                                    {new Date(item.uploadedOn).toLocaleDateString(
-                                        "id-ID", {
-                                            day: "numeric",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
-                                    )}
+                                    {new Intl.DateTimeFormat("id-ID", {
+                                        timeZone: "Asia/Jakarta",
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                    }).format(new Date(item.uploadedOn)) +
+                                    "." +
+                                    String(new Date(item.uploadedOn).getMilliseconds()).padStart(3, "0")}
                                 </td>
 
                                 <td>
@@ -364,15 +389,17 @@ export default function DatasetReportTable() {
                                 </td>
 
                                 <td>
-                                    {new Date(item.createdAt).toLocaleDateString(
-                                        "id-ID", {
-                                            day: "numeric",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        }
-                                    )}
+                                    {new Intl.DateTimeFormat("id-ID", {
+                                        timeZone: "Asia/Jakarta",
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                    }).format(new Date(item.createdAt)) +
+                                    "." +
+                                    String(new Date(item.createdAt).getMilliseconds()).padStart(3, "0")}
                                 </td>
 
                                 <td>
