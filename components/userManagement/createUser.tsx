@@ -3,6 +3,7 @@
 import {useState} from "react";
 import styles from "./createUser.module.css";
 import styles2 from "./Button.module.css";
+import Popup from "../PopUp";
 
 type props = {
   onSuccess: () => void;
@@ -13,6 +14,11 @@ export default function CreateUserForm({onSuccess}: props) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [role, setRole] = useState("operator");
+
+    const [popup, setPopup] = useState({
+      show: false,
+      message: ""
+    });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -49,16 +55,27 @@ export default function CreateUserForm({onSuccess}: props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message || "Failed to create user");
-                return;
+              setPopup({
+                show: true,
+                message: data.message || "Failed to create user"
+              });
+              return;
             }
-            alert("User created!")
-            onSuccess?.();
-        } catch (error) {
-            console.error(error);
-            alert("Failed to create user");
-        }
-    };
+
+              setPopup({
+                  show: true,
+                  message: "User created!"
+              });
+              onSuccess?.();
+
+            } catch (error) {
+                console.error(error);
+                setPopup({
+                    show: true,
+                    message: "Failed to create user"
+                });
+              }
+      };
 
     return (
     <div className={styles.container}>
@@ -117,6 +134,12 @@ export default function CreateUserForm({onSuccess}: props) {
           Add New User
         </button>
       </form>
+
+      <Popup
+        isOpen={popup.show}
+        message={popup.message}
+        onClose={() => setPopup({ show: false, message: "" })}
+      />
     </div>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import {useState} from "react";
+import { useState } from "react";
 import styles from "./uploadModal.module.css";
+import Popup from "../PopUp";
 
 type Props = {
     onClose: () => void;
@@ -10,16 +11,26 @@ type Props = {
 
 export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
     const [file, setFile] = useState<File | null>(null);
+
+    // ✅ PINDAHIN KE DALAM COMPONENT
+    const [popup, setPopup] = useState({ show: false, message: "" });
+
     const API = process.env.NEXT_PUBLIC_API_URL;
 
     const handleUpload = async () => {
         if (!file) {
-            alert("Please select a file");
+            setPopup({
+                show: true,
+                message: "Please select a file"
+            });
             return;
         }
 
         if (!file.name.endsWith(".csv")) {
-            alert("Please select a CSV file");
+            setPopup({
+                show: true,
+                message: "Please select a CSV file"
+            });
             return;
         }
 
@@ -40,11 +51,18 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
-            alert("Upload Success");
+            setPopup({
+                show: true,
+                message: "Upload Success"
+            });
+
             onSuccess();
         } catch (err) {
             console.log(err);
@@ -52,29 +70,32 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
     };
 
     return (
-    <div className={styles.container}>
-      <h2 className={styles.title}>UPLOAD DATASET</h2>
+        <div className={styles.container}>
+            <h2 className={styles.title}>UPLOAD DATASET</h2>
 
-      {/* FILE INPUT */}
-      <div className={styles.fileGroup}>
-        <input
-          type="file"
-          accept=".csv"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-        />
-        {file && <p className={styles.fileName}>{file.name}</p>}
-      </div>
+            <div className={styles.fileGroup}>
+                <input
+                    type="file"
+                    accept=".sam"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                />
+            </div>
 
-      {/* BUTTON */}
-      <div className={styles.buttonGroup}>
-        <button className={styles.cancelBtn} onClick={onClose}>
-          Cancel
-        </button>
+            <div className={styles.buttonGroup}>
+                <button className={styles.cancelBtn} onClick={onClose}>
+                    Cancel
+                </button>
 
-        <button className={styles.uploadBtn} onClick={handleUpload}>
-          Upload
-        </button>
-      </div>
-    </div>
-  );
+                <button className={styles.uploadBtn} onClick={handleUpload}>
+                    Upload
+                </button>
+            </div>
+
+            <Popup
+                isOpen={popup.show}
+                message={popup.message}
+                onClose={() => setPopup({ show: false, message: "" })}
+            />
+        </div>
+    );
 }
