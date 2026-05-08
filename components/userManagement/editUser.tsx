@@ -88,7 +88,6 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
                         <option value="administrator">Administrator</option>
                     </select>
                 </div>
-
                 <div className={styles.buttonGroup}>
                     <button type="button" onClick={onClose} className={styles.cancelBtn}>
                         Cancel
