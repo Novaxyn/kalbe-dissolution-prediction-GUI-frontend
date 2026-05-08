@@ -2,14 +2,26 @@
 
 import {useState} from "react"
 import UploadBox from "./UploadBox";
+import Popup from "../PopUp";
 
 export default function PredictionPanel() {
     const [file, setFile] = useState<File | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
+    const [popup, setPopup] = useState({
+        show: false,
+        message: ""
+    });
+
     const handleUpload = async () => {
-        if (!file) return alert ("Please select a file");
+        if (!file) {
+            setPopup({
+                show: true,
+                message: "Please select a file"
+            });
+            return;
+        }
 
         try {
             setLoading(true);
@@ -18,7 +30,7 @@ export default function PredictionPanel() {
 
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/datasets/upload`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_DATASET_API}/api/datasets/upload`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -35,7 +47,11 @@ export default function PredictionPanel() {
                 console.log("Upload Failed: ", err.message);
                 setError(err.message);
 
-                alert(err.message);
+                setPopup({
+                    show: true,
+                    message: err.message
+                });
+
             } finally {
                 setLoading(false);
         }
@@ -64,6 +80,13 @@ export default function PredictionPanel() {
             <button onClick={handleUpload} disabled={loading}className="mt-6 bg-green-800 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold disabled:opacity-50">
                 {loading ? "Uploading..." : "RUN PREDICTION MODEL"}
             </button>
+
+            <Popup
+                isOpen={popup.show}
+                message={popup.message}
+                onClose={() => setPopup({ show: false, message: "" })}
+            />          
         </div>
+        
     )
 }

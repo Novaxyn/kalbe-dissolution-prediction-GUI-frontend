@@ -1,0 +1,48 @@
+.container {
+  width: 400px;
+  padding: 20px;
+  text-align: center;
+}
+
+.title {
+  color: #0f6f54;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+.fileGroup {
+  margin-bottom: 20px;
+}
+
+.fileName {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #555;
+}
+
+.buttonGroup {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.cancelBtn {
+  background-color: #ccc;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.uploadBtn {
+  background-color: #7ed321;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.uploadBtn:hover {
+  background-color: #6ac11d;
+}
