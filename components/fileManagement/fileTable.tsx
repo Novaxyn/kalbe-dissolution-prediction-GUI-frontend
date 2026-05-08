@@ -61,7 +61,7 @@ export default function DatasetReportTable() {
     const [editReport, setEditReport] = useState<Report | null>(null);
 
     const [showUploadModal, setShowUploadModal] = useState(false);
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_DATASET_API;
 
     const [popup, setPopup] = useState({
         show: false,
@@ -77,7 +77,7 @@ export default function DatasetReportTable() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/dataset-reports`, {
+            const res = await fetch(`${API}/api/reports/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -94,7 +94,7 @@ export default function DatasetReportTable() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/datasets`, {
+            const res = await fetch(`${API}/api/datasets/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -217,7 +217,7 @@ export default function DatasetReportTable() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/dataset-reports/update/${selDatasetReport}`, {
+            const res = await fetch(`${API}/api/reports/archive/${selDatasetReport}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",

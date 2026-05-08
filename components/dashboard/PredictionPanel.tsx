@@ -30,7 +30,7 @@ export default function PredictionPanel() {
 
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/datasets/upload`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_DATASET_API}/api/datasets/upload`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`

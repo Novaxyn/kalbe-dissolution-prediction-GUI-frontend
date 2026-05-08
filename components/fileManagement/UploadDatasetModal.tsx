@@ -11,11 +11,9 @@ type Props = {
 
 export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
     const [file, setFile] = useState<File | null>(null);
-
-    // ✅ PINDAHIN KE DALAM COMPONENT
     const [popup, setPopup] = useState({ show: false, message: "" });
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_DATASET_API;
 
     const handleUpload = async () => {
         if (!file) {

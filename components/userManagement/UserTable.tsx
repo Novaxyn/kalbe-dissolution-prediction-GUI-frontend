@@ -39,7 +39,7 @@ export default function UserTable({ title, users, type }: Props) {
         message: ""
     });
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_USER_API;
 
     const getToken = () => {
         const token = localStorage.getItem("token");
