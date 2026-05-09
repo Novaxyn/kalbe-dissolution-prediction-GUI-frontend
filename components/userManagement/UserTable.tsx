@@ -5,6 +5,7 @@ import styles from "./UserTable.module.css";
 import Modal from "@/components/Modal";
 import EditUserForm from "@/components/userManagement/editUser";
 import { useState } from "react";
+import Popup from "../PopUp";
 
 type User = {
     _id: string;
@@ -33,14 +34,22 @@ export default function UserTable({ title, users, type }: Props) {
     const [showEdit, setShowEdit] = useState(false);
     const [editUser, setEditUser] = useState<User | null>(null);
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const [popup, setPopup] = useState({
+        show: false,
+        message: ""
+    });
+
+    const API = process.env.NEXT_PUBLIC_USER_API;
 
     const getToken = () => {
         const token = localStorage.getItem("token");
 
         if(!token) {
-            alert("Unauthorized");
-            return;
+            setPopup({
+                show: true,
+                message: "Unauthorized"
+            });
+            return null;
         }
 
         return {
@@ -49,13 +58,20 @@ export default function UserTable({ title, users, type }: Props) {
         };
     };
 
+    // Get token and set headers
+    const headers = getToken();
+
+    if(!headers) {
+        return;
+    }
+
     const handleDelete = async () => {
         if (!selUserId) return;
 
         try {
             const res = await fetch(`${API}/api/users/deactivate/${selUserId}`, {
                 method: "PUT",
-                headers: getToken(),
+                headers,
                 body: JSON.stringify({
                     status: "inactive",
                     role: "nonActive",
@@ -65,24 +81,34 @@ export default function UserTable({ title, users, type }: Props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
-            alert("User deactivated");
+            setPopup({
+                show: true,
+                message: "User deactivated"
+            });
 
             setShowConfirm(false);
             window.location.reload();
-        } catch (error) {
-            console.log(error);
-        }
-    };
+            } catch (error) {
+                console.log(error);
+                setPopup({
+                    show: true,
+                    message: "Failed to deactivate user"
+                });
+            }
+    }
 
     const handleReactivate = async (id: string) => {
         try {
             const res = await fetch(`${API}/api/users/reactivate/${id}`, {
                 method: "PUT",
-                headers: getToken(),
+                headers,
                 body: JSON.stringify({
                     status: "active",
                     role: "operator",
@@ -92,14 +118,25 @@ export default function UserTable({ title, users, type }: Props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
-                return;
-            }
+            setPopup({
+                show: true,
+                message: data.message
+            });
+            return;
+        }
 
-            alert("User reactivated");
-            window.location.reload();
+        setPopup({
+            show: true,
+            message: "User reactivated"
+        });
+
+        window.location.reload();
         } catch (error) {
             console.log(error);
+            setPopup({
+                show: true,
+                message: "Failed to reactivate user"
+            });
         }
     };
 
@@ -161,7 +198,7 @@ export default function UserTable({ title, users, type }: Props) {
                 </tbody>
             </table>
 
-            {/* Deactivate Confirm */}
+            {/* Deactivate Confirm (Manual modal)*/}
             {showConfirm && (
                 <div className={styles.overlay}>
                     <div className={styles.confirmBox}>
@@ -208,6 +245,11 @@ export default function UserTable({ title, users, type }: Props) {
                 )}
 
             </Modal>
+            <Popup
+                isOpen={popup.show}
+                message={popup.message}
+                onClose={() => setPopup({ show: false, message: "" })}
+            />
         </div>
     );
     

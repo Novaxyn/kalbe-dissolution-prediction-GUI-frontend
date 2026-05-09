@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import styles from "./editFile.module.css";
+import Popup from "../PopUp"; 
 
 type Props = {
     file: any;
@@ -10,8 +11,17 @@ type Props = {
 };
 
 export default function EditFileForm({ file, onClose, onSuccess }: Props) {
-    const [datasetName, setDatasetName] = useState(file.dataSetId?.originalName || "");
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const [datasetName, setDatasetName] = useState(
+        file.originalName || file.dataSetId?.originalName || ""
+    );
+
+    
+    const [popup, setPopup] = useState({
+        show: false,
+        message: ""
+    });
+
+    const API = process.env.NEXT_PUBLIC_DATASET_URL;
 
     const handleEdit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -19,12 +29,17 @@ export default function EditFileForm({ file, onClose, onSuccess }: Props) {
         const token = localStorage.getItem("token");
 
         if (!token) {
-            alert("Unauthorized");
+            setPopup({
+                show: true,
+                message: "Unauthorized"
+            });
             return;
         }
 
         try {
-            const res = await fetch(`${API}/api/datasets/${file.dataSetId._id}`, {
+            const idDataset = file.dataSetId?._id || file._id;
+
+            const res = await fetch(`${API}/api/datasets/${idDataset}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -38,11 +53,18 @@ export default function EditFileForm({ file, onClose, onSuccess }: Props) {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message);
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
                 return;
             }
 
-            alert("Dataset edited");
+            setPopup({
+                show: true,
+                message: "Dataset edited"
+            });
+
             onSuccess();
         } catch (error) {
             console.log(error);
@@ -77,6 +99,13 @@ export default function EditFileForm({ file, onClose, onSuccess }: Props) {
                     </button>
                 </div>
             </form>
+
+            
+            <Popup
+                isOpen={popup.show}
+                message={popup.message}
+                onClose={() => setPopup({ show: false, message: "" })}
+            />
         </div>
     );
 }
