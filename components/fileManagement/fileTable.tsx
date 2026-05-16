@@ -358,10 +358,19 @@ export default function DatasetReportTable() {
             </table>
 
             {/* Pagination */}
-            <div className={styles.pagination}>
+            <div 
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
                 <button
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
+                    className={styles.buttonAction}
                 >
                     Prev
                 </button>
@@ -373,6 +382,7 @@ export default function DatasetReportTable() {
                 <button
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPage}
+                    className={styles.buttonAction}
                 >
                     Next
                 </button>
