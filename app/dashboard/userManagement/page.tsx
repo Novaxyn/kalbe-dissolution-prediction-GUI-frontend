@@ -39,7 +39,7 @@ export default function UserManagementPage() {
 
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/users/users`,
+                    `${process.env.NEXT_PUBLIC_USER_API}/api/users/`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

@@ -18,6 +18,7 @@ type Dataset = {
     originalName: string;
     uploadTime: string;
     uploadedBy: User;
+    uploadedByUsername: string;
 }
 
 type Report = {
@@ -61,7 +62,11 @@ export default function DatasetReportTable() {
     const [editReport, setEditReport] = useState<Report | null>(null);
 
     const [showUploadModal, setShowUploadModal] = useState(false);
-    const API = process.env.NEXT_PUBLIC_API_URL;
+
+    const [page, setPage] = useState(1);
+    const [totalPage, setTotalPage] = useState(1);
+    const [sort, setSort] = useState("asc");
+    const API = process.env.NEXT_PUBLIC_DATASET_API;
 
     const [popup, setPopup] = useState({
         show: false,
@@ -71,13 +76,13 @@ export default function DatasetReportTable() {
     useEffect(() => {
         fetchDatasetReport();
         fetchDataset();
-    }, []);
+    }, [page, sort]);
 
     const fetchDatasetReport = async () => {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/dataset-reports`, {
+            const res = await fetch(`${API}/api/reports/`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -94,14 +99,23 @@ export default function DatasetReportTable() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/datasets`, {
+            const query = new URLSearchParams({
+                page: String(page),
+                limit: "10",
+                sort: sort,
+            });
+
+            const res = await fetch(`${API}/api/datasets/?${query}`, {
+                method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                cache: "no-store",
             });
 
             const result = await res.json();
             setDatasets(result.datasets || []);
+            setTotalPage(result.totalPage || 1);
         } catch (error) {
             console.log(error);
         }
@@ -205,7 +219,8 @@ export default function DatasetReportTable() {
             });
 
             setFile(null);
-            fetchDataset(); // Refresh the table
+            setPage(1);
+            await fetchDataset(); // Refresh the table
         } catch (error) {
             console.log(error);
         }
@@ -217,7 +232,7 @@ export default function DatasetReportTable() {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/dataset-reports/update/${selDatasetReport}`, {
+            const res = await fetch(`${API}/api/reports/archive/${selDatasetReport}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -242,6 +257,14 @@ export default function DatasetReportTable() {
         }
     };
 
+    const handleSort = async () => {
+        if (sort === "asc") {
+            setSort("desc");
+        } else {
+            setSort("asc");
+        }
+    }
+
     return (
         <div className={styles.container}>
             <h2 className={styles.title}>Dataset Report</h2>
@@ -253,7 +276,28 @@ export default function DatasetReportTable() {
                         <th>No</th>
                         <th>MicroNIR Dataset</th>
                         <th>Uploaded By</th>
-                        <th>Date</th>
+                        <th>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                    cursor: "pointer",
+                                    userSelect: "none"
+                                }}
+                                onClick={handleSort}
+                            >
+                                Date
+
+                                <span
+                                    style={{
+                                        fontSize: "12px"
+                                    }}
+                                >
+                                    {sort === "asc" ? "▲" : "▼"}
+                                </span>
+                            </div>
+                        </th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -266,12 +310,12 @@ export default function DatasetReportTable() {
                     ) : (
                         datasets.map((item, index) => (
                             <tr key={item._id}>
-                                <td>{index + 1}</td>
+                                <td>{(page - 1) * 10 + index + 1}</td>
 
                                 <td>{item.originalName || "-"}</td>
 
                                 <td>
-                                    {item.uploadedBy?.username || "-"}
+                                    {item.uploadedByUsername || "-"}
                                 </td>
 
                                 <td>
@@ -312,6 +356,27 @@ export default function DatasetReportTable() {
                     )}
                 </tbody>
             </table>
+
+            {/* Pagination */}
+            <div className={styles.pagination}>
+                <button
+                    onClick={() => setPage(page - 1)}
+                    disabled={page === 1}
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {page} of {totalPage}
+                </span>
+
+                <button
+                    onClick={() => setPage(page + 1)}
+                    disabled={page === totalPage}
+                >
+                    Next
+                </button>
+            </div>
 
             <div style={{marginBottom: "20px", marginTop: "20px"}}>
                 <button 
@@ -454,6 +519,7 @@ export default function DatasetReportTable() {
                     onClose={() => setShowUploadModal(false)}
                     onSuccess={() => {
                         setShowUploadModal(false);
+                        fetchDataset();
                         fetchDatasetReport();
                     }}
                 />

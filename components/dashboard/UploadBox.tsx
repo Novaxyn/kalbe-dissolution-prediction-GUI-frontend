@@ -16,6 +16,22 @@ export default function UploadBox({file, setFile}: Props) {
         message: ""
     });
 
+    const allowedExtensions = [".xls", ".xlsx"]
+
+    const validateFile = (selectedFile: File) => {
+        const extension = selectedFile.name
+            .substring(selectedFile.name.lastIndexOf("."))
+            .toLowerCase();
+        
+        if (!allowedExtensions.includes(extension)) {
+            setPopup({
+                show: true,
+                message: "Only .xls, .xlsx file allowed"
+            });
+            return false;
+        }
+        return true;
+    }
 
     const handleClick = () => {
         inputRef.current?.click();
@@ -25,13 +41,7 @@ export default function UploadBox({file, setFile}: Props) {
         const selectedFile = e.target.files?.[0];
         if (!selectedFile) return;
 
-        if (!selectedFile.name.toLowerCase().endsWith(".sam")) {
-            setPopup({
-                show: true,
-                message: "Only .sam file allowed"
-            });
-            return;
-        }
+        if (!validateFile(selectedFile)) return;
         setFile(selectedFile);
     };
 
@@ -45,13 +55,7 @@ export default function UploadBox({file, setFile}: Props) {
     const droppedFile = e.dataTransfer.files?.[0];
         if (!droppedFile) return;
 
-        if (!droppedFile.name.toLowerCase().endsWith(".sam")) {
-            setPopup({
-                show: true,
-                message: "Only .sam file allowed"
-            });
-            return;
-        }
+        if (!validateFile(droppedFile)) return;
         setFile(droppedFile);
     };
 
@@ -67,7 +71,7 @@ export default function UploadBox({file, setFile}: Props) {
                 ref={inputRef} 
                 onChange={handleChange} 
                 className="hidden" 
-                accept=".sam" 
+                accept=".xls, .xlsx" 
             />
 
             {/* NO FILE STATE */}

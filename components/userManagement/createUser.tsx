@@ -24,7 +24,7 @@ export default function CreateUserForm({onSuccess}: props) {
         e.preventDefault();
 
         try {
-            const baseURL = process.env.NEXT_PUBLIC_API_URL;
+            const baseURL = process.env.NEXT_PUBLIC_USER_API;
 
             console.log(baseURL);
 

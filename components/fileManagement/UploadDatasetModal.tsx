@@ -11,11 +11,9 @@ type Props = {
 
 export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
     const [file, setFile] = useState<File | null>(null);
-
-    // PINDAHIN KE DALAM COMPONENT
     const [popup, setPopup] = useState({ show: false, message: "" });
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_DATASET_API;
 
     const handleUpload = async () => {
         if (!file) {
@@ -26,14 +24,19 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
             return;
         }
 
-        if (!file.name.endsWith(".csv")) {
+        const allowedExtensions = [".xls", ".xlsx"];
+
+        const fileExtensions = file.name
+            .substring(file.name.lastIndexOf("."))
+            .toLowerCase();
+        
+        if (!allowedExtensions.includes(fileExtensions)) {
             setPopup({
                 show: true,
-                message: "Please select a CSV file"
+                message: "Only .xls, .xlsx file allowed"
             });
             return;
         }
-
         try {
             const token = localStorage.getItem("token");
 
@@ -76,7 +79,7 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
             <div className={styles.fileGroup}>
                 <input
                     type="file"
-                    accept=".sam"
+                    accept=".xls, .xlsx"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                 />
             </div>

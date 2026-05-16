@@ -22,7 +22,7 @@ export default function LogTable() {
     const [userFilter, setUserFilter] = useState("");
     const [roleFilter, setRoleFilter] = useState("");
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_LOG_API;
 
     useEffect(() => {
         const fetchLogs = async () => {

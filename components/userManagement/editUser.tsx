@@ -20,7 +20,7 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
         message: ""
     });
 
-    const API = process.env.NEXT_PUBLIC_API_URL;
+    const API = process.env.NEXT_PUBLIC_USER_API;
 
     const handleEdit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -36,7 +36,7 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
         }
 
         try {
-            const res = await fetch(`${API}/api/users/user/${user._id}`, {
+            const res = await fetch(`${API}/api/users/${user._id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -108,7 +108,6 @@ export default function EditUserForm({user, onClose, onSuccess}: props) {
                         <option value="administrator">Administrator</option>
                     </select>
                 </div>
-
                 <div className={styles.buttonGroup}>
                     <button type="button" onClick={onClose} className={styles.cancelBtn}>
                         Cancel

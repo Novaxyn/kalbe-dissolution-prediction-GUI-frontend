@@ -31,7 +31,7 @@ export default function PredictionPanel() {
 
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/datasets/upload`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_DATASET_API}/api/datasets/upload`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -103,7 +103,7 @@ export default function PredictionPanel() {
 
             <p className="text-sm text-gray-500 mb-10">
                 Please make sure the file format meets the requirement.
-                Only .xlsx, .xls, or .csv is allowed.
+                Only .xlsx and .xls is allowed.
             </p>
 
             <UploadBox file={file} setFile={setFile} />
