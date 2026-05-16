@@ -1,4 +1,3 @@
-
 "use client";
 
 import styles from "./UserTable.module.css";
@@ -25,6 +24,18 @@ type Props = {
 };
 
 export default function UserTable({ title, users, type }: Props) {
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const usersPerPage = 5;
+
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+
+    const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
+    const totalPages = Math.ceil(users.length / usersPerPage);
 
     //Deactivate
     const [showConfirm, setShowConfirm] = useState(false);
@@ -157,7 +168,7 @@ export default function UserTable({ title, users, type }: Props) {
                 </thead>
 
                 <tbody>
-                    {users.map((user) => (
+                    {currentUsers.map((user) => (
                         <tr key={user._id}>
                             <td>{user.userId}</td>
                             <td>{user.username}</td>
@@ -175,6 +186,7 @@ export default function UserTable({ title, users, type }: Props) {
                                         className={styles.buttonAction}>
                                             Edit
                                         </button>
+
                                         <button onClick={() => {
                                             setSelUserId(user._id);
                                             setShowConfirm(true);
@@ -197,6 +209,36 @@ export default function UserTable({ title, users, type }: Props) {
                     ))}
                 </tbody>
             </table>
+
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
+                <button
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.buttonAction}
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={currentPage === totalPages}
+                    className={styles.buttonAction}
+                >
+                    Next
+                </button>
+            </div>
 
             {/* Deactivate Confirm (Manual modal)*/}
             {showConfirm && (
@@ -245,6 +287,7 @@ export default function UserTable({ title, users, type }: Props) {
                 )}
 
             </Modal>
+
             <Popup
                 isOpen={popup.show}
                 message={popup.message}
@@ -252,5 +295,4 @@ export default function UserTable({ title, users, type }: Props) {
             />
         </div>
     );
-    
 }

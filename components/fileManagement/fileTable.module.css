@@ -55,7 +55,7 @@
   color: #888;
 }
 
-/* LINK (Prediction Result) */
+/* LINK */
 .link {
   color: #007bff;
   cursor: pointer;
@@ -67,31 +67,31 @@
   color: #0056b3;
 }
 
-/* OPTIONAL: LOADING TEXT */
+/* LOADING */
 .loading {
   color: orange;
   font-style: italic;
 }
 
-/* Container for buttons (IMPORTANT for spacing) */
+/* BUTTON GROUP */
 .actionGroup {
   display: flex;
   justify-content: center;
   gap: 10px;
   align-items: center;
-  
 }
 
-/* Main button style */
+/* BUTTON */
 .buttonAction {
-  background-color: #0b6b53;
-  color: #ffffff;
+  background-color: #84cc16 !important;
+  color: black !important;
   border: none;
-  padding: 6px 16px;
+  padding: 8px 18px;
   border-radius: 8px;
   cursor: pointer;
-  font-weight: 600;
-  font-size: 14px;
+
+  font-weight: 700;
+  font-size: 16px;
 
   display: inline-flex;
   align-items: center;
@@ -100,20 +100,24 @@
   transition: all 0.2s ease;
 }
 
-/* Hover */
 .buttonAction:hover {
-  background-color: #095743;
+  background-color: #65a30d !important;
+  color: black !important;
   transform: translateY(-1px);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Click */
 .buttonAction:active {
   transform: scale(0.97);
   box-shadow: none;
 }
 
-/* Optional: softer secondary button (Archive/Delete/etc) */
+.buttonAction:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  color: black !important;
+}
+
 .buttonSecondary {
   background-color: #e8f5f1;
   color: #0b6b53;

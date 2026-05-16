@@ -19,8 +19,8 @@ export default function LogTable() {
     const [totalPage, setTotalPage] = useState(1);
 
     //Filter
-    const[userFilter, setUserFilter] = useState("");
-    const[roleFilter, setRoleFilter] = useState("");
+    const [userFilter, setUserFilter] = useState("");
+    const [roleFilter, setRoleFilter] = useState("");
 
     const API = process.env.NEXT_PUBLIC_LOG_API;
 
@@ -63,14 +63,14 @@ export default function LogTable() {
         <div className={styles.container}>
             <h2 className={styles.title}>Activity Log</h2>
 
-            {/*filter*/}
+            {/* Filter */}
             <div className={styles.filterContainer}>
                 <input
                     type="text"
                     placeholder="Search user..."
                     value={userFilter}
                     onChange={(e) => {
-                        setPage(1); // reset page
+                        setPage(1);
                         setUserFilter(e.target.value);
                     }}
                     className={styles.input}
@@ -90,7 +90,7 @@ export default function LogTable() {
                 </select>
             </div>
 
-            {/*table*/}
+            {/* Table */}
             <table className={styles.table}>
                 <thead>
                     <tr>
@@ -119,12 +119,12 @@ export default function LogTable() {
                                 <td>
                                     {log.createdAt
                                         ? new Date(log.createdAt).toLocaleString("id-ID", {
-                                            day: "numeric",
-                                            month: "2-digit",
-                                            year: "numeric",
-                                            hour: "2-digit",
-                                            minute: "2-digit",
-                                        })
+                                              day: "numeric",
+                                              month: "2-digit",
+                                              year: "numeric",
+                                              hour: "2-digit",
+                                              minute: "2-digit",
+                                          })
                                         : "-"}
                                 </td>
 
@@ -137,11 +137,12 @@ export default function LogTable() {
                 </tbody>
             </table>
 
-            {/*Pagination*/}
+            {/* Pagination */}
             <div className={styles.pagination}>
                 <button
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
+                    className={styles.buttonAction}
                 >
                     Prev
                 </button>
@@ -153,6 +154,7 @@ export default function LogTable() {
                 <button
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPage}
+                    className={styles.buttonAction}
                 >
                     Next
                 </button>
