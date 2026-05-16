@@ -14,6 +14,7 @@ export default function PredictionPanel() {
         message: ""
     });
 
+
     const handleUpload = async () => {
         if (!file) {
             setPopup({
@@ -55,8 +56,46 @@ export default function PredictionPanel() {
             } finally {
                 setLoading(false);
         }
+
+        const handleDownload = async () => {
+            try {
+                const token = localStorage.getItem("token");
+
+                const res = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/predictions/download`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                );
+
+                if (!res.ok) {
+                    throw new Error("Failed to download report");
+                }
+
+                const blob = await res.blob();
+
+                const url = window.URL.createObjectURL(blob);
+
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "prediction-report.pdf";
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+
+            } catch (err: any) {
+                setPopup({
+                    show: true,
+                    message: err.message
+                });
+            }
+        }
+
     }
     return (
+
         <div className="w-full md:w-1/2 p-8 flex flex-col justify-start">
             <h2 className="font-semibold mb-2">
                 Upload/ <span className="text-blue-500">Choose uploaded dataset</span>
@@ -77,9 +116,14 @@ export default function PredictionPanel() {
             }
 
             
-            <button onClick={handleUpload} disabled={loading}className="mt-6 bg-green-800 hover:bg-green-700 text-white px-6 py-2 rounded font-semibold disabled:opacity-50">
+            <button
+                onClick={handleUpload}
+                disabled={loading || !file}
+                className="mt-6 bg-green-500 hover:bg-green-400 text-white px-6 py-2 rounded font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            >
                 {loading ? "Uploading..." : "RUN PREDICTION MODEL"}
             </button>
+
 
             <Popup
                 isOpen={popup.show}

@@ -40,12 +40,12 @@
   background-color: #f2f2f2;
 }
 
-/* HOVER EFFECT (biar interaktif dikit) */
+/* HOVER EFFECT */
 .table tr:hover {
   background-color: #e6f2ef;
 }
 
-/* LINK STYLE (kalau nanti ada detail/log click) */
+/* LINK STYLE */
 .table a {
   color: blue;
   cursor: pointer;
@@ -60,26 +60,51 @@
 }
 
 .filterContainer {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 15px;
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
 }
 
 .input {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 .select {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 .pagination {
-    margin-top: 15px;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.buttonAction {
+  background-color: #84cc16;
+  color: black;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+
+  font-weight: 700;
+  font-size: 16px;
+
+  transition: all 0.2s ease;
+}
+
+.buttonAction:hover {
+  background-color: #65a30d;
+  transform: translateY(-1px);
+}
+
+.buttonAction:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
