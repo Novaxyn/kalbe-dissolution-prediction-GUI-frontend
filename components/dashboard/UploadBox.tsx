@@ -16,7 +16,7 @@ export default function UploadBox({file, setFile}: Props) {
         message: ""
     });
 
-    const allowedExtensions = [".csv", ".xls", ".xlsx"]
+    const allowedExtensions = [".xls", ".xlsx"]
 
     const validateFile = (selectedFile: File) => {
         const extension = selectedFile.name
@@ -26,7 +26,7 @@ export default function UploadBox({file, setFile}: Props) {
         if (!allowedExtensions.includes(extension)) {
             setPopup({
                 show: true,
-                message: "Only .csv, .xls, .xlsx file allowed"
+                message: "Only .xls, .xlsx file allowed"
             });
             return false;
         }
@@ -71,7 +71,7 @@ export default function UploadBox({file, setFile}: Props) {
                 ref={inputRef} 
                 onChange={handleChange} 
                 className="hidden" 
-                accept=".csv, .xls, .xlsx" 
+                accept=".xls, .xlsx" 
             />
 
             {/* NO FILE STATE */}

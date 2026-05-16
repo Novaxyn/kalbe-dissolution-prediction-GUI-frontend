@@ -24,7 +24,7 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
             return;
         }
 
-        const allowedExtensions = [".csv", ".xls", ".xlsx"];
+        const allowedExtensions = [".xls", ".xlsx"];
 
         const fileExtensions = file.name
             .substring(file.name.lastIndexOf("."))
@@ -33,7 +33,7 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
         if (!allowedExtensions.includes(fileExtensions)) {
             setPopup({
                 show: true,
-                message: "Only .csv, .xls, .xlsx file allowed"
+                message: "Only .xls, .xlsx file allowed"
             });
             return;
         }
@@ -79,7 +79,7 @@ export default function UploadDatasetModal({ onClose, onSuccess }: Props) {
             <div className={styles.fileGroup}>
                 <input
                     type="file"
-                    accept=".csv, .xls, .xlsx"
+                    accept=".xls, .xlsx"
                     onChange={(e) => setFile(e.target.files?.[0] || null)}
                 />
             </div>

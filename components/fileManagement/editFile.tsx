@@ -21,7 +21,7 @@ export default function EditFileForm({ file, onClose, onSuccess }: Props) {
         message: ""
     });
 
-    const API = process.env.NEXT_PUBLIC_DATASET_URL;
+    const API = process.env.NEXT_PUBLIC_DATASET_API;
 
     const handleEdit = async (e: React.FormEvent) => {
         e.preventDefault();
