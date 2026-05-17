@@ -47,6 +47,7 @@ type Report = {
 export default function DatasetReportTable() {
     const [file, setFile] = useState<File | null>(null);
     const [datasets, setDatasets] = useState<Dataset[]>([]);
+    const [archivedDatasets, setArchivedDatasets] = useState<Dataset[]>([]);
     const [reports, setReports] = useState<Report[]>([]);
 
     const [showEditDataset, setShowEditDataset] = useState(false);
@@ -64,7 +65,10 @@ export default function DatasetReportTable() {
     const [showUploadModal, setShowUploadModal] = useState(false);
 
     const [page, setPage] = useState(1);
+    const [archivedPage, setArchivedPage] = useState(1);
+    
     const [totalPage, setTotalPage] = useState(1);
+    const [archivedTotalPage, setArchivedTotalPage] = useState(1);
     const [sort, setSort] = useState("asc");
     const API = process.env.NEXT_PUBLIC_DATASET_API;
 
@@ -76,7 +80,8 @@ export default function DatasetReportTable() {
     useEffect(() => {
         fetchDatasetReport();
         fetchDataset();
-    }, [page, sort]);
+        fetchArchivedDataset();
+    }, [page, archivedPage, sort]);
 
     const fetchDatasetReport = async () => {
         try {
@@ -116,6 +121,32 @@ export default function DatasetReportTable() {
             const result = await res.json();
             setDatasets(result.datasets || []);
             setTotalPage(result.totalPage || 1);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const fetchArchivedDataset = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const query = new URLSearchParams({
+                page: String(archivedPage),
+                limit: "10",
+                sort: sort,
+            });
+
+            const res = await fetch(`${API}/api/datasets/archived?${query}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                cache: "no-store",
+            });
+
+            const result = await res.json();
+            setArchivedDatasets(result.datasets || []);
+            setArchivedTotalPage(result.totalPage || 1);
         } catch (error) {
             console.log(error);
         }
@@ -175,6 +206,7 @@ export default function DatasetReportTable() {
 
             setShowArchiveDataset(false);
             fetchDataset();
+            fetchArchivedDataset();
         } catch (error) {
             console.log(error);
         }
@@ -262,6 +294,37 @@ export default function DatasetReportTable() {
             setSort("desc");
         } else {
             setSort("asc");
+        }
+    }
+
+    const handleActivateDataset = async (id: string) => {
+        if (!id) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(`${API}/api/datasets/activate/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                setPopup({
+                    show: true,
+                    message: data.message
+                });
+                return;
+            }
+
+            fetchDataset();
+            fetchArchivedDataset();
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -357,11 +420,20 @@ export default function DatasetReportTable() {
                 </tbody>
             </table>
 
-            {/* Pagination */}
-            <div className={styles.pagination}>
+            {/* Dataset Pagination */}
+            <div 
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
                 <button
                     onClick={() => setPage(page - 1)}
                     disabled={page === 1}
+                    className={styles.buttonAction}
                 >
                     Prev
                 </button>
@@ -373,6 +445,120 @@ export default function DatasetReportTable() {
                 <button
                     onClick={() => setPage(page + 1)}
                     disabled={page === totalPage}
+                    className={styles.buttonAction}
+                >
+                    Next
+                </button>
+            </div>
+
+            <h2 className={styles.title}>Archived Dataset</h2>
+
+            {/* Upload Dataset */}
+            <table className={styles.table}>
+                <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>MicroNIR Dataset</th>
+                        <th>Uploaded By</th>
+                        <th>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "6px",
+                                    cursor: "pointer",
+                                    userSelect: "none"
+                                }}
+                                onClick={handleSort}
+                            >
+                                Date
+
+                                <span
+                                    style={{
+                                        fontSize: "12px"
+                                    }}
+                                >
+                                    {sort === "asc" ? "▲" : "▼"}
+                                </span>
+                            </div>
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {archivedDatasets.length === 0 ? (
+                        <tr>
+                            <td colSpan={6}>No data</td>
+                        </tr>
+                    ) : (
+                        archivedDatasets.map((item, index) => (
+                            <tr key={item._id}>
+                                <td>{(archivedPage - 1) * 10 + index + 1}</td>
+
+                                <td>{item.originalName || "-"}</td>
+
+                                <td>
+                                    {item.uploadedByUsername || "-"}
+                                </td>
+
+                                <td>
+                                    {new Intl.DateTimeFormat("id-ID", {
+                                        timeZone: "Asia/Jakarta",
+                                        year: "numeric",
+                                        month: "2-digit",
+                                        day: "2-digit",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                        second: "2-digit",
+                                    }).format(new Date(item.uploadTime)) +
+                                    "." +
+                                    String(new Date(item.uploadTime).getMilliseconds()).padStart(3, "0")}
+                                </td>
+
+                                <td>
+                                    <div className={styles.actionGroup}>
+                                        <button className={styles.buttonAction}
+                                            onClick={() => {
+                                                handleActivateDataset(item._id)
+                                            }}
+                                        >
+                                            Activate
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    )}
+                </tbody>
+            </table>
+
+            {/* Archived Pagination */}
+            <div 
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
+                <button
+                    onClick={() => setArchivedPage(archivedPage - 1)}
+                    disabled={archivedPage === 1}
+                    className={styles.buttonAction}
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {archivedPage} of {archivedTotalPage}
+                </span>
+
+                <button
+                    onClick={() => setArchivedPage(archivedPage + 1)}
+                    disabled={archivedPage === archivedTotalPage}
+                    className={styles.buttonAction}
                 >
                     Next
                 </button>

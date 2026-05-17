@@ -1,10 +1,9 @@
-
 "use client";
 
 import styles from "./UserTable.module.css";
 import Modal from "@/components/Modal";
 import EditUserForm from "@/components/userManagement/editUser";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Popup from "../PopUp";
 
 type User = {
@@ -20,11 +19,16 @@ type User = {
 
 type Props = {
     title: string;
-    users: User[];
     type: "active" | "inactive";
 };
 
-export default function UserTable({ title, users, type }: Props) {
+export default function UserTable({ title, type }: Props) {
+
+    // Pagination
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const [users, setUsers] = useState<User[]>([]);
+    const [totalPages, setTotalPages] = useState(1);
 
     //Deactivate
     const [showConfirm, setShowConfirm] = useState(false);
@@ -64,6 +68,57 @@ export default function UserTable({ title, users, type }: Props) {
     if(!headers) {
         return;
     }
+
+    const fetchUsers = async () => {
+        try {
+            // Get token
+            const token = localStorage.getItem("token");
+
+            if (!token) return;
+
+            // Get type of users
+            const endpoint =
+                type === "active"
+                    ? "active"
+                    : "inactive";
+
+            const res = await fetch(
+                `${API}/api/users/${endpoint}?page=${currentPage}&limit=5`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            const formattedUsers = (data.users || []).map((user: any) => ({
+                _id: user._id,
+                userId: user.userId,
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                status: user.status || "active",
+                createdBy: user.createdBy,
+                createdAt: new Date(user.createdAt).toLocaleDateString("id-ID", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                }),
+            }));
+
+            setUsers(formattedUsers);
+            setTotalPages(data.totalPage || 1);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, [currentPage, type]);
 
     const handleDelete = async () => {
         if (!selUserId) return;
@@ -175,6 +230,7 @@ export default function UserTable({ title, users, type }: Props) {
                                         className={styles.buttonAction}>
                                             Edit
                                         </button>
+
                                         <button onClick={() => {
                                             setSelUserId(user._id);
                                             setShowConfirm(true);
@@ -197,6 +253,36 @@ export default function UserTable({ title, users, type }: Props) {
                     ))}
                 </tbody>
             </table>
+
+            <div
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
+                <button
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                    disabled={currentPage === 1}
+                    className={styles.buttonAction}
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {currentPage} of {totalPages}
+                </span>
+
+                <button
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                    disabled={currentPage === totalPages}
+                    className={styles.buttonAction}
+                >
+                    Next
+                </button>
+            </div>
 
             {/* Deactivate Confirm (Manual modal)*/}
             {showConfirm && (
@@ -245,6 +331,7 @@ export default function UserTable({ title, users, type }: Props) {
                 )}
 
             </Modal>
+
             <Popup
                 isOpen={popup.show}
                 message={popup.message}
@@ -252,5 +339,4 @@ export default function UserTable({ title, users, type }: Props) {
             />
         </div>
     );
-    
 }

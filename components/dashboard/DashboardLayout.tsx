@@ -6,7 +6,7 @@ export default function DashboardLayput({role}: {role: "administrator" | "operat
         <div className="min-h screen flex flex-col">
             <div className="flex flex-col md:flex-row bg-white w-full h-[calc(100vh-80px)]">
                 <PredictionPanel /> 
-                <ResultPanel /> 
+                <ResultPanel  hasResult={false} /> 
             </div>
         </div>
     )
