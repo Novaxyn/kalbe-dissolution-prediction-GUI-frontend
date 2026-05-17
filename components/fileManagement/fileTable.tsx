@@ -66,9 +66,11 @@ export default function DatasetReportTable() {
 
     const [page, setPage] = useState(1);
     const [archivedPage, setArchivedPage] = useState(1);
-    
+    const [reportPage, setReportPage] = useState(1);
+
     const [totalPage, setTotalPage] = useState(1);
     const [archivedTotalPage, setArchivedTotalPage] = useState(1);
+    const [reportTotalPage, setReportTotalPage] = useState(1);
     const [sort, setSort] = useState("asc");
     const API = process.env.NEXT_PUBLIC_DATASET_API;
 
@@ -81,20 +83,30 @@ export default function DatasetReportTable() {
         fetchDatasetReport();
         fetchDataset();
         fetchArchivedDataset();
-    }, [page, archivedPage, sort]);
+    }, [page, archivedPage, reportPage, sort]);
 
     const fetchDatasetReport = async () => {
         try {
             const token = localStorage.getItem("token");
 
-            const res = await fetch(`${API}/api/reports/`, {
+            const query = new URLSearchParams({
+                page: String(page),
+                limit: "10",
+                sort: sort,
+            });
+
+            const res = await fetch(`${API}/api/reports/?${query}`, {
+                method: "GET",
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
+                cache: "no-store",
             });
 
             const result = await res.json();
-            setReports(result.data || []);
+            setReports(result.reports || []);
+            setTotalPage(result.totalPage || 1);
+
         } catch (error) {
             console.log(error);
         }
@@ -678,6 +690,37 @@ export default function DatasetReportTable() {
                 </tbody>
             </table>
 
+            {/* Report Pagination */}
+            <div 
+                style={{
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    gap: "10px",
+                    marginTop: "20px"
+                }}
+            >
+                <button
+                    onClick={() => setReportPage(reportPage - 1)}
+                    disabled={reportPage === 1}
+                    className={styles.buttonAction}
+                >
+                    Prev
+                </button>
+
+                <span>
+                    Page {reportPage} of {reportTotalPage}
+                </span>
+
+                <button
+                    onClick={() => setReportPage(reportPage + 1)}
+                    disabled={reportPage === reportTotalPage}
+                    className={styles.buttonAction}
+                >
+                    Next
+                </button>
+            </div>
+
             {/* Dataset */}
             <Modal
                 isOpen={showEditDataset}
@@ -763,6 +806,8 @@ export default function DatasetReportTable() {
                 )}
 
             </Modal>
+
+            
 
             {/* Dataset */}
             <Modal
